@@ -15,7 +15,8 @@ router
     upload("product").fields([
       { name: "mainImage", maxCount: 1 },
       { name: "coverImage", maxCount: 5 },
-    ]),validation(productValidation),
+    ]),
+    validation(productValidation),
     asyncHandler(productRouter.addProduct)
   )
   // .put(

@@ -84,13 +84,13 @@ const productSchema = new Schema(
   }
 );
 productSchema.post("init", (doc) => {
-  if (doc.mainImage) {
-    doc.mainImage = "http://localhost:3000/uploads/product/" + doc.mainImage;
+  if (doc?.mainImage) {
+    doc.mainImage = "http://localhost:3000/uploads/product/" + doc?.mainImage;
   }
 });
 productSchema.post("init", (doc) => {
-  if (doc.coverImage) {
-    doc.coverImage =  doc.coverImage.map(
+  if (doc?.coverImage) {
+    doc.coverImage =  doc?.coverImage.map(
       (image) => "http://localhost:3000/uploads/product/" + image
     );
   }

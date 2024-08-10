@@ -1,15 +1,24 @@
 import slugify from "slugify";
 import Product from "../../../../database/models/product.model.js";
 import fs from "fs";
+import ApiFeatures from "../../../utils/apiFeatures.js";
 
 // Get all Products
 export const getProducts = async (req, res, next) => {
   try {
-    const products = await Product.find();
-    return res.json({
-      message: "Products retrieved successfully",
-      data: products,
-    });
+    let apiFeature = new ApiFeatures(Product.find(), req.query);
+    apiFeature = apiFeature.pagination().sort().search().fields().populate();
+
+    const products = await apiFeature.mongooseQuery;
+    return products.length
+      ? res.json({
+          message: "Products retrieved successfully",
+          productsNumber: products.length,
+          data: products,
+        })
+      : res.json({
+          message: "Not found products",
+        });
   } catch (error) {
     console.error({
       message: "Error fetching products",
