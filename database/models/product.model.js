@@ -55,12 +55,12 @@ const productSchema = new Schema(
     },
     createdBy: {
       type: Types.ObjectId,
-      // required: true,
-      // ref: "User",
+      required: true,
+      ref: "User",
     },
     updatedBy: {
       type: Types.ObjectId,
-      // ref: "User",
+      ref: "User",
     },
     category: {
       type: Types.ObjectId,

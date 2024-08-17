@@ -2,12 +2,19 @@ import slugify from "slugify";
 import Product from "../../../../database/models/product.model.js";
 import fs from "fs";
 import ApiFeatures from "../../../utils/apiFeatures.js";
+import { json } from "express";
 
 // Get all Products
 export const getProducts = async (req, res, next) => {
   try {
     let apiFeature = new ApiFeatures(Product.find(), req.query);
-    apiFeature = apiFeature.pagination().sort().search().fields().populate();
+    apiFeature = apiFeature
+      .pagination()
+      .sort()
+      .search()
+      .fields()
+      .populate()
+      .filter();
 
     const products = await apiFeature.mongooseQuery;
     return products.length
@@ -65,6 +72,7 @@ export const getProduct = async (req, res, next) => {
 export const addProduct = async (req, res, next) => {
   try {
     const { title } = req.body;
+    const { _id } = req.user;
     let slug = "";
     if (title) {
       slug = slugify(title, { lower: true, trim: true });
@@ -81,6 +89,7 @@ export const addProduct = async (req, res, next) => {
       slug,
       mainImage,
       coverImage,
+      createdBy: _id,
     });
     return res.status(201).json({
       message: "Product created successfully",
@@ -93,64 +102,64 @@ export const addProduct = async (req, res, next) => {
 };
 
 // Update a Product by ID
-// export const updateProduct = async (req, res, next) => {
-//   try {
-//     const { id } = req.params;
-//     const { title } = req.body;
-//     if (!id) {
-//       return res.status(400).json({ message: "Product ID is required" });
-//     }
-//     if (!title) {
-//       return res.status(400).json({ message: "Title is required for update" });
-//     }
-//     const slug = slugify(title, { lower: true, trim: true });
-//     const product = await Product.findById(id);
-//     if (!product) {
-//       return res.status(404).json({ message: "Product not found by this ID" });
-//     }
-//     console.log(product);
-//     console.log(req.files);
-//     const mainImage = req.files.mainImage
-//       ? req.files.mainImage.filename
-//       : product.mainImage;
-//     console.log(mainImage);
-//     const coverImage = req.files?.coverImage
-//       ? req.files.coverImage.map((file) => file.filename)
-//       : product.coverImage;
-//     console.log(coverImage);
-//     // if (req.files.mainImage) {
-//     //   fs.unlink(`./uploads/product/${product.mainImage}`, (err) => {
-//     //     if (err) {
-//     //       console.error({ message: 'Error deleting old main image', error: err.message });
-//     //     }
-//     //   });
-//     // }
+export const updateProduct = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { title } = req.body;
+    if (!id) {
+      return res.status(400).json({ message: "Product ID is required" });
+    }
+    if (!title) {
+      return res.status(400).json({ message: "Title is required for update" });
+    }
+    const slug = slugify(title, { lower: true, trim: true });
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found by this ID" });
+    }
+    console.log(product);
+    console.log(req.files);
+    const mainImage = req.files.mainImage
+      ? req.files.mainImage.filename
+      : product.mainImage;
+    console.log(mainImage);
+    const coverImage = req.files?.coverImage
+      ? req.files.coverImage.map((file) => file.filename)
+      : product.coverImage;
+    console.log(coverImage);
+    // if (req.files.mainImage) {
+    //   fs.unlink(`./uploads/product/${product.mainImage}`, (err) => {
+    //     if (err) {
+    //       console.error({ message: 'Error deleting old main image', error: err.message });
+    //     }
+    //   });
+    // }
 
-//     // if (req.files.coverImage) {
-//     //   product.coverImage.forEach((image) => {
-//     //     fs.unlink(`./uploads/product/${image}`, (err) => {
-//     //       if (err) {
-//     //         console.error({ message: 'Error deleting old cover image', error: err.message });
-//     //       }
-//     //     });
-//     //   });
-//     // }
+    // if (req.files.coverImage) {
+    //   product.coverImage.forEach((image) => {
+    //     fs.unlink(`./uploads/product/${image}`, (err) => {
+    //       if (err) {
+    //         console.error({ message: 'Error deleting old cover image', error: err.message });
+    //       }
+    //     });
+    //   });
+    // }
 
-//     const updatedProduct = await Product.findByIdAndUpdate(
-//       id,
-//       { ...req.body, slug, mainImage, coverImage },
-//       { new: true }
-//     );
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      { ...req.body, slug, mainImage, coverImage },
+      { new: true }
+    );
 
-//     return res.status(200).json({
-//       message: "Product updated successfully",
-//       data: updatedProduct,
-//     });
-//   } catch (error) {
-//     console.error({ message: "Error updating product", error: error.message });
-//     res.status(500).json({ message: "Error updating product in the database" });
-//   }
-// };
+    return res.status(200).json({
+      message: "Product updated successfully",
+      data: updatedProduct,
+    });
+  } catch (error) {
+    console.error({ message: "Error updating product", error: error.message });
+    res.status(500).json({ message: "Error updating product in the database" });
+  }
+};
 
 // Delete a Product by ID
 export const deleteProduct = async (req, res, next) => {

@@ -22,7 +22,7 @@ const subCategorySchema = new mongoose.Schema(
     createdBy: {
       type: Types.ObjectId,
       ref: "User",
-      // required: [true, "CreatedBy is required"],
+      required: [true, "CreatedBy is required"],
     },
     updatedBy: {
       type: Types.ObjectId,

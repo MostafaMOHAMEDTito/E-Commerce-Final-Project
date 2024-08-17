@@ -4,53 +4,69 @@ import jwt from "jsonwebtoken";
 import { customAlphabet } from "nanoid";
 import sendEmail from "../../../utils/sendEmail.js";
 import asyncHandler from "../../../middleware/asyncHandler.js";
+import roles from "../../../Types/roles.js";
 
 //1-  Sign Up
 export const signUp = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
   // Check if the email already exists
-  const existEmail = await User.findOne({ email });
-  if (existEmail) {
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
     return res.status(409).json({ message: "Email already exists" });
   }
 
   // Hash the password
-  const hashPassword = bcryptjs.hashSync(password, 8);
-  req.body.password = hashPassword;
+  const hashedPassword = bcryptjs.hashSync(password, 8);
 
-  const newUser = await User.create(req.body);
+  // Prepare the user data
+  const userData = {
+    ...req.body,
+    password: hashedPassword,
+    role: roles.user,
+  };
+console.log(userData);
+
+  // Create the new user
+  const newUser = await User.create(userData);
+  console.log(newUser);
+  
+
+  // Exclude the password from the response
   newUser.password = undefined;
 
-  return res
-    .status(201)
-    .json({ message: "User created successfully", user: newUser });
+  return res.status(201).json({ 
+    message: "User created successfully", 
+    user: newUser 
+  });
 });
 //2 - Sign In
 export const signIn = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
+
   if (!user || !bcryptjs.compareSync(password, user.password)) {
     return next(new Error("invalid email or password", { cause: 401 }));
     //return res.status(401).json({ message: "Email or Password not found" });
   }
   // Update user status to online
+
   const updateStatus = await User.findByIdAndUpdate(
     user.id,
     { status: "online" },
     { new: true }
   );
+
   // Generate JWT token
   jwt.sign(
     {
       _id: user.id,
       name: user.username,
       email: user.email,
-      mobileNumber: user.mobileNumber,
       status: updateStatus.status,
       role: user.role,
     },
-    "mostafa",
+    process.env.SECRET_KEY,
     (error, token) => {
       if (error) {
         console.error("Error generating token", error.message);
@@ -72,11 +88,9 @@ export const updateAccount = asyncHandler(async (req, res, next) => {
       .status(402)
       .json({ message: "You must be online to update your account" });
   }
-  // Check if email, password, or mobile number already exists
-  const { email, mobileNumber } = req.body;
-  const existingUser = await User.findOne({
-    $or: [{ email }, { mobileNumber }],
-  });
+  // Check if email, password  already exists
+  const { email } = req.body;
+  const existingUser = await User.findOne(email);
   if (existingUser) {
     return res
       .status(409)
@@ -84,9 +98,6 @@ export const updateAccount = asyncHandler(async (req, res, next) => {
   }
   // Update user account details
   const updateData = { ...req.body };
-  if (updateData.firstName && updateData.lastName) {
-    updateData.username = `${updateData.firstName} ${updateData.lastName}`;
-  }
 
   // Update user account details
   const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
@@ -140,15 +151,19 @@ export const getUserById = asyncHandler(async (req, res, next) => {
 //7 - Update password
 export const updatePassword = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
+  const { password, oldPassword } = req.body;
   // Check if user is online
   const onlineStatus = req.user.status;
   if (onlineStatus !== "online") {
-    res
+    return res
       .status(402)
       .json({ message: "You must be online to update your password" });
   }
+  const user = await User.findById(userId);
+  if (!bcryptjs.compareSync(oldPassword, user.password)) {
+    return res.status(402).json({ message: "Your password not true" });
+  }
 
-  const { password } = req.body;
   const newPassword = bcryptjs.hashSync(password, 8);
 
   // Update user account details

@@ -48,6 +48,7 @@ export const getBrand = async (req, res, next) => {
 export const addBrand = async (req, res, next) => {
   try {
     const { name } = req.body;
+    const { _id } = req.user;
     const slug = slugify(name, { lower: true, trim: true });
 
     const existName = await Brand.findOne({ name });
@@ -63,6 +64,7 @@ export const addBrand = async (req, res, next) => {
       ...req.body,
       slug,
       image: req.file?.filename,
+      createdBy: _id,
     });
     return res.status(201).json({
       message: "Brand created successfully",

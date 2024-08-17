@@ -1,12 +1,11 @@
 import { Router } from "express";
-import * as brandRouter from "./controller/brand.controller.js";
+import * as couponRouter from "./controller/coupon.controller.js";
 import asyncHandler from "../../middleware/asyncHandler.js";
-import upload from "../../middleware/upload.js";
-import { addBrandValidation } from "./brand.validation.js";
 import validation from "../../middleware/validation.js";
 import { authentication } from "../../middleware/authentication.js";
 import authorization from "../../middleware/authorization.js";
 import roles from "../../Types/roles.js";
+import { couponValidation } from "./coupon.validation.js";
 const router = Router();
 
 router
@@ -14,33 +13,25 @@ router
     "/",
     authentication,
     authorization([roles.admin]),
-    asyncHandler(brandRouter.getBrands)
+    asyncHandler(couponRouter.getCoupons)
   )
   .get(
     "/:id",
     authentication,
     authorization([roles.admin, roles.user]),
-    asyncHandler(brandRouter.getBrand)
+    asyncHandler(couponRouter.getCoupon)
   )
   .post(
     "/",
-    upload("brand").single("image"),
-    validation(addBrandValidation),
+    validation(couponValidation),
     authentication,
     authorization([roles.admin]),
-    asyncHandler(brandRouter.addBrand)
-  )
-  .put(
-    "/:id",
-    upload("brand").single("image"),
-    authentication,
-    authorization([roles.admin]),
-    asyncHandler(brandRouter.updateBrand)
+    asyncHandler(couponRouter.addCoupon)
   )
   .delete(
     "/:id",
     authentication,
     authorization([roles.admin]),
-    asyncHandler(brandRouter.deleteBrand)
+    asyncHandler(couponRouter.deleteCoupon)
   );
 export default router;

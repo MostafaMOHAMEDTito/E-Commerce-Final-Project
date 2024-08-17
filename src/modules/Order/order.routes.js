@@ -1,12 +1,11 @@
 import { Router } from "express";
-import * as brandRouter from "./controller/brand.controller.js";
+import * as orderRouter from "./controller/order.controller.js";
 import asyncHandler from "../../middleware/asyncHandler.js";
-import upload from "../../middleware/upload.js";
-import { addBrandValidation } from "./brand.validation.js";
 import validation from "../../middleware/validation.js";
 import { authentication } from "../../middleware/authentication.js";
 import authorization from "../../middleware/authorization.js";
 import roles from "../../Types/roles.js";
+import { orderValidation } from "./order.validation.js";
 const router = Router();
 
 router
@@ -14,33 +13,25 @@ router
     "/",
     authentication,
     authorization([roles.admin]),
-    asyncHandler(brandRouter.getBrands)
+    asyncHandler(orderRouter.getOrders)
   )
   .get(
     "/:id",
     authentication,
     authorization([roles.admin, roles.user]),
-    asyncHandler(brandRouter.getBrand)
+    asyncHandler(orderRouter.getOrder)
   )
   .post(
     "/",
-    upload("brand").single("image"),
-    validation(addBrandValidation),
+    // validation(orderValidation),
     authentication,
     authorization([roles.admin]),
-    asyncHandler(brandRouter.addBrand)
-  )
-  .put(
-    "/:id",
-    upload("brand").single("image"),
-    authentication,
-    authorization([roles.admin]),
-    asyncHandler(brandRouter.updateBrand)
+    asyncHandler(orderRouter.addOrder)
   )
   .delete(
     "/:id",
     authentication,
     authorization([roles.admin]),
-    asyncHandler(brandRouter.deleteBrand)
+    asyncHandler(orderRouter.deleteOrder)
   );
 export default router;

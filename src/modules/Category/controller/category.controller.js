@@ -8,6 +8,7 @@ export const getCategories = async (req, res, next) => {
     const categories = await Category.find();
     return res.json({
       message: "Categories retrieved successfully",
+      categoriesNumber: categories.length,
       data: categories,
     });
   } catch (error) {
@@ -51,6 +52,7 @@ export const getcategory = async (req, res, next) => {
 export const addCategory = async (req, res, next) => {
   try {
     const { name } = req.body;
+    const { _id } = req.user;
     let slug = "";
     if (name) {
       slug = slugify(name, { lower: true, trim: true });
@@ -67,6 +69,7 @@ export const addCategory = async (req, res, next) => {
       ...req.body,
       slug,
       image: req.file ? req.file.filename : "",
+      createdBy: _id,
     });
     return res.status(201).json({
       message: "Category created successfully",

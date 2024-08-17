@@ -38,7 +38,7 @@ class ApiFeatures {
       this.mongooseQuery.find({
         $or: [
           { title: { $regex: search, $options: "i" } },
-          { desc: { $regex: search, $options: "i" } }
+          { desc: { $regex: search, $options: "i" } },
         ],
       });
     }
@@ -51,6 +51,21 @@ class ApiFeatures {
       { path: "brand", select: ["name", "slug"] },
       { path: "subCategory", select: ["name", "slug"] },
     ]);
+    return this;
+  }
+  filter() {
+    let query = {...this.data};
+    ["limit", "search", "page", "sort", "fields"].forEach((el) => {
+      delete query[el];
+    });
+
+    if (query) {
+      query = JSON.stringify(query);
+      query = query.replace(/gt|gte|lt|lte|eq/g, (value) => `$${value}`);
+      query = JSON.parse(query);
+
+      this.mongooseQuery.find(query);
+    }
     return this;
   }
 }

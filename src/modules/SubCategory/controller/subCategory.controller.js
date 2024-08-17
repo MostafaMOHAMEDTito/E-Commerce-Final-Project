@@ -22,8 +22,9 @@ export const getSubCategories = async (req, res, next) => {
 };
 export const getSubCategoriesByCategory = async (req, res, next) => {
   try {
-    
-    const subCategories = await SubCategory.find({category:req.params.id}).populate("category");
+    const subCategories = await SubCategory.find({
+      category: req.params.id,
+    }).populate("category");
     return res.json({
       message: "Subcategories retrieved successfully",
       data: subCategories,
@@ -71,7 +72,9 @@ export const getSubCategory = async (req, res, next) => {
 // Add a new subcategory
 export const addSubCategory = async (req, res, next) => {
   try {
+    const { _id } = req.user;
     const { name, category } = req.body;
+
     const slug = slugify(name, { lower: true, trim: true });
 
     const existName = await SubCategory.findOne({ name });
@@ -93,6 +96,7 @@ export const addSubCategory = async (req, res, next) => {
       ...req.body,
       slug,
       image: req.file?.filename,
+      createdBy: _id,
     });
     return res.status(201).json({
       message: "Subcategory created successfully",
