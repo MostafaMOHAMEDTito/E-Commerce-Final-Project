@@ -5,7 +5,7 @@ import validation from "../../middleware/validation.js";
 import { authentication } from "../../middleware/authentication.js";
 import authorization from "../../middleware/authorization.js";
 import roles from "../../Types/roles.js";
-import { orderValidation } from "./order.validation.js";
+import { orderValidation } from "./orderValidation.js";
 const router = Router();
 
 router
@@ -23,15 +23,21 @@ router
   )
   .post(
     "/",
-    // validation(orderValidation),
+    validation(orderValidation),
     authentication,
-    authorization([roles.admin]),
+    authorization([roles.admin, roles.user]),
     asyncHandler(orderRouter.addOrder)
   )
   .delete(
     "/:id",
     authentication,
-    authorization([roles.admin]),
+    authorization([roles.admin, roles.user]),
     asyncHandler(orderRouter.deleteOrder)
+  )
+  .post(
+    "/checkOutSession/:_id",
+    authentication,
+    authorization([roles.admin, roles.user]),
+    asyncHandler(orderRouter.checkOutSession)
   );
 export default router;

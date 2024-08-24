@@ -9,4 +9,5 @@ export const cartValidation = Joi.object({
     return value;
   }),
   quantity: Joi.number().integer().min(1),
+  price: Joi.number().min(1),
 });
