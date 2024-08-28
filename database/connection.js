@@ -1,12 +1,16 @@
 import mongoose from "mongoose";
 
-const connected = ()=>{
+const connected = () => {
   try {
-    mongoose.connect("mongodb://localhost:27017/E-Commerce").then(()=>{
-      console.log("DB Connected");
-    })
+    mongoose
+      .connect(
+        "mongodb+srv://MostafaMohamed:lordmoha007@cluster0.jufuw.mongodb.net/E-Commerce"
+      )
+      .then(() => {
+        console.log("DB Connected");
+      });
   } catch (error) {
-    console.log("Failed connect DB");
+    console.log({ message: "Failed connect DB", error: error.message });
   }
-}
-export default connected
+};
+export default connected;

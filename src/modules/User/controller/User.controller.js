@@ -25,19 +25,16 @@ export const signUp = asyncHandler(async (req, res, next) => {
     password: hashedPassword,
     role: roles.user,
   };
-console.log(userData);
 
   // Create the new user
   const newUser = await User.create(userData);
-  console.log(newUser);
-  
 
   // Exclude the password from the response
   newUser.password = undefined;
 
-  return res.status(201).json({ 
-    message: "User created successfully", 
-    user: newUser 
+  return res.status(201).json({
+    message: "User created successfully",
+    user: newUser,
   });
 });
 //2 - Sign In
